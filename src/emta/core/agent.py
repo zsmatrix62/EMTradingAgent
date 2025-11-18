@@ -86,18 +86,25 @@ class TradingAgent:
                 # Handle the case where asset_pos might not have "Data" key
                 if "Data" in asset_pos:
                     for data in asset_pos["Data"]:
+                        # Helper function to handle empty string values for numeric fields
+                        def safe_get_numeric(data, key, default=0):
+                            value = data.get(key, default)
+                            if value == "":
+                                return default
+                            return value
+
                         # Create AccountOverview instance
                         account = AccountOverview(
-                            Djzj=data.get("Djzj", 0),
-                            Dryk=data.get("Dryk", 0),
-                            Kqzj=data.get("Kqzj", 0),
-                            Kyzj=data.get("Kyzj", 0),
-                            Ljyk=data.get("Ljyk", 0),
+                            Djzj=safe_get_numeric(data, "Djzj", 0),
+                            Dryk=safe_get_numeric(data, "Dryk", 0),
+                            Kqzj=safe_get_numeric(data, "Kqzj", 0),
+                            Kyzj=safe_get_numeric(data, "Kyzj", 0),
+                            Ljyk=safe_get_numeric(data, "Ljyk", 0),
                             Money_type=data.get("Money_type", ""),
-                            RMBZzc=data.get("RMBZzc", 0),
-                            Zjye=data.get("Zjye", 0),
-                            Zxsz=data.get("Zxsz", 0),
-                            Zzc=data.get("Zzc", 0),
+                            RMBZzc=safe_get_numeric(data, "RMBZzc", 0),
+                            Zjye=safe_get_numeric(data, "Zjye", 0),
+                            Zxsz=safe_get_numeric(data, "Zxsz", 0),
+                            Zzc=safe_get_numeric(data, "Zzc", 0),
                         )
 
                         portfolio = Portfolio()
@@ -148,9 +155,11 @@ class TradingAgent:
             # Since AccountInfo is a TypedDict, first_account is already a dict
             return {
                 "username": first_account["username"],
-                "account_balance": first_account["account_overview"].Zjye
-                if first_account["account_overview"]
-                else 0,
+                "account_balance": (
+                    first_account["account_overview"].Zjye
+                    if first_account["account_overview"]
+                    else 0
+                ),
                 "portfolio": first_account["portfolio"],
             }
 
