@@ -326,3 +326,12 @@ class OrderRecord:
     def to_dict(self) -> dict[str, str]:
         """转换为字典"""
         return asdict(self)
+
+
+@dataclass
+class PlaceOrderResult:
+    """Result of placing an order"""
+
+    order_ids: list[str]
+    success: bool
+    error_message: str | None = None

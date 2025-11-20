@@ -15,6 +15,7 @@ from ..models.trading import (
     AccountOverview,
     OrderRecord,
     OrderType,
+    PlaceOrderResult,
     Portfolio,
     Position,
 )
@@ -167,7 +168,7 @@ class TradingAgent:
 
     def place_order(
         self, stock_code: str, trade_type: OrderType, amount: int, price: float
-    ) -> tuple[list[str], bool]:
+    ) -> PlaceOrderResult | None:
         """Place a trading order
 
         Args:
@@ -177,11 +178,11 @@ class TradingAgent:
             price: Order price
 
         Returns:
-            List of order IDs if successful, True; [Error Message], False otherwise
+            PlaceOrderResult object if successful, None if not logged in
         """
         if not self.is_logged_in or not self.auth_client.validate_key:
             self.logger.error("User not logged in")
-            return [], False
+            return None
 
         self.logger.info(
             f"Placing {trade_type.value} order for {stock_code}: "
@@ -195,7 +196,9 @@ class TradingAgent:
         if resp["Status"] != 0:
             err_msg = resp["Message"]
             self.logger.error(resp["Message"])
-            return [err_msg], False
+            return PlaceOrderResult(
+                order_ids=[err_msg], success=False, error_message=err_msg
+            )
         ret = []
         for i in resp["Data"]:
             # Order string consists of trade date and trade number
@@ -205,7 +208,7 @@ class TradingAgent:
             ret.append(order_id)
             self.logger.info(f"Order placed successfully with ID: {order_id}")
         self.logger.info(ret)
-        return ret, True
+        return PlaceOrderResult(order_ids=ret, success=True)
 
     def query_orders(self) -> list[OrderRecord]:
         """Query existing trading orders
