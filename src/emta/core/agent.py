@@ -177,11 +177,11 @@ class TradingAgent:
             price: Order price
 
         Returns:
-            List of order IDs if successful, None otherwise
+            List of order IDs if successful, True; [Error Message], False otherwise
         """
         if not self.is_logged_in or not self.auth_client.validate_key:
             self.logger.error("User not logged in")
-            return None
+            return [], False
 
         self.logger.info(
             f"Placing {trade_type.value} order for {stock_code}: "
@@ -193,8 +193,9 @@ class TradingAgent:
         )
         self.logger.info(resp)
         if resp["Status"] != 0:
+            err_msg = resp["Message"]
             self.logger.error(resp["Message"])
-            return None
+            return [err_msg], False
         ret = []
         for i in resp["Data"]:
             # Order string consists of trade date and trade number
@@ -204,7 +205,7 @@ class TradingAgent:
             ret.append(order_id)
             self.logger.info(f"Order placed successfully with ID: {order_id}")
         self.logger.info(ret)
-        return ret
+        return ret, True
 
     def query_orders(self) -> list[OrderRecord]:
         """Query existing trading orders
