@@ -167,7 +167,7 @@ class TradingAgent:
 
     def place_order(
         self, stock_code: str, trade_type: OrderType, amount: int, price: float
-    ) -> list[str] | None:
+    ) -> tuple[list[str], bool]:
         """Place a trading order
 
         Args:
